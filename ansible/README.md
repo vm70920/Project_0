@@ -1,6 +1,7 @@
 Using ansible playbook on EC2 AMI Linux:
 
-Clone repository into users home directory.
+Playbook designed to do: * install httpd server * edit httpd.conf file * copy index.html file into var/www/html folder * create group named Users * create 2 users * generate pair of ssh keys for each user * make users public keys authorized keys for access *restarts httpd
+Clone repository into /tmp directory.
 
 Before running ansible playbook:
 
