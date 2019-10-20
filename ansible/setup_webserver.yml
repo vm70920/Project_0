@@ -14,11 +14,13 @@
      after: '<Directory\s/>'
      before: '</Directory>'
      backup: yes
+    ignore_errors: true
 
   - name: copy index.html
     copy:
      src: ~/index.html
      dest: /var/www/html/index.html
+    ignore_errors: true
 
   - name: create group Users
     group: name=Users state=present
@@ -27,19 +29,25 @@
     user:
      name: "{{item}}"
      shell: "/bin/bash"
-     group: Users, www-data
+     group: Users
      state: present
     with_items:
      - "user1"
      - "user2"
   - name: generate SSh keys
     openssh_keypair:
-      path: /home/{{item}}
-      loop:
-         - user1
-         - user2
+     path: /home/{{item}}/.ssh/id_ssh_rsa
+    loop:
+     - "user1"
+     - "user2"
   - name: deploy ssh keys
-       authorized_key: user={{item}} key="{{lookup('file', '/home/{{item}}/.ssh/id_rsa.pub')}}" state=present
+    authorized_key:
+     user: "{{item}}"
+     key: "{{ lookup('file', '/home/{{item}}/.ssh/id_ssh_rsa/id_rsa.pub') }}"
+     state: present
+    loop:
+     - "user1"
+     - "user2"
 
   - name: restart httpd server
     service: name=httpd state=restarted

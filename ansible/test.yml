@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  tasks:
+   - name: create group Users
+     become: yes
+     group: name=Users state=present
+
+   - name: create users for group Users
+     become: yes
+     user:
+      name: "{{item}}"
+      shell: "/bin/bash"
+      group: Users
+      state: present
+     with_items:
+      - "user1"
+      - "user2"
+
+   - name: generate SSh keys
+     openssh_keypair:
+      path: /home/{{item}}/id_rsa.pub
+     loop:
+      - "user1"
+      - "user2"
+   - name: deploy ssh keys
+     authorized_key:
+      user: "{{item}}"
+      key: "{{ lookup('file', '/home/{{item}}/id_rsa.pub') }}"
+      state: present
+     loop:
+      - "user1"
+      - "user2"
+
