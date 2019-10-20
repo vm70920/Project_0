@@ -1,0 +1,20 @@
+---
+-hosts: localhost
+ tasks:
+  -name: update cache
+   apt: update_cache=true
+
+  -name: install httpd server
+   apt: name=httpd state=present
+
+  -name: edit httpd.conf
+   replace:
+    path: /etc/httpd/httpd.conf
+    regexp: 'denied'
+    replace: 'granted'
+    after: '<Directory\s/>'
+    before: '</Directory>'
+    backup: yes
+
+  -name: restart httpd server
+   service: name=httpd state=restarted
