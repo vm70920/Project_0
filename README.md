@@ -1,6 +1,6 @@
 # Project_0
 
-Goal of the project to design simple website running on webserver (AWS EC2 instance).
+Goal for the project to design simple website running on webserver (AWS EC2 instance).
 
 Major task breakdown:
  1. Obtain domain name
