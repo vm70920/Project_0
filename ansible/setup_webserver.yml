@@ -1,11 +1,9 @@
 ---
 -hosts: localhost
  tasks:
-  -name: update cache
-   apt: update_cache=true
 
   -name: install httpd server
-   apt: name=httpd state=present
+   yum: name=httpd state=latest
 
   -name: edit httpd.conf
    replace:
@@ -15,6 +13,10 @@
     after: '<Directory\s/>'
     before: '</Directory>'
     backup: yes
+  -name: copy index.html
+   copy:
+    src: ~/index.html
+    dest: /var/www/html/index.html
 
   -name: restart httpd server
    service: name=httpd state=restarted
