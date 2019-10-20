@@ -1,22 +1,45 @@
 ---
--hosts: localhost
- tasks:
+- hosts: localhost
+  become: true
+  tasks:
 
-  -name: install httpd server
-   yum: name=httpd state=latest
+  - name: install httpd server
+    yum: name=httpd state=latest
 
-  -name: edit httpd.conf
-   replace:
-    path: /etc/httpd/httpd.conf
-    regexp: 'denied'
-    replace: 'granted'
-    after: '<Directory\s/>'
-    before: '</Directory>'
-    backup: yes
-  -name: copy index.html
-   copy:
-    src: ~/index.html
-    dest: /var/www/html/index.html
+  - name: edit httpd.conf
+    replace:
+     path: /etc/httpd/httpd.conf
+     regexp: 'denied'
+     replace: 'granted'
+     after: '<Directory\s/>'
+     before: '</Directory>'
+     backup: yes
+
+  - name: copy index.html
+    copy:
+     src: ~/index.html
+     dest: /var/www/html/index.html
+
+  - name: create group Users
+    group: name=Users state=present
+
+  - name: create users for group Users
+    user:
+     name: "{{item}}"
+     shell: "/bin/bash"
+     group: Users, www-data
+     state: present
+    with_items:
+     - "user1"
+     - "user2"
+  - name: generate SSh keys
+    openssh_keypair:
+      path: /home/{{item}}
+      loop:
+         - user1
+         - user2
+  - name: deploy ssh keys
+       authorized_key: user={{item}} key="{{lookup('file', '/home/{{item}}/.ssh/id_rsa.pub')}}" state=present
 
   -name: restart httpd server
    service: name=httpd state=restarted
