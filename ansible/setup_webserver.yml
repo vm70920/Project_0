@@ -1,6 +1,8 @@
 ---
 - hosts: localhost
   become: true
+  vars:
+   password: user1
   tasks:
 
   - name: install httpd server
@@ -8,7 +10,7 @@
 
   - name: edit httpd.conf
     replace:
-     path: /etc/httpd/httpd.conf
+     path: /etc/httpd/conf/httpd.conf
      regexp: 'denied'
      replace: 'granted'
      after: '<Directory\s/>'
@@ -18,7 +20,7 @@
 
   - name: copy index.html
     copy:
-     src: ~/index.html
+     src: /tmp/Project_0/index.html
      dest: /var/www/html/index.html
     ignore_errors: true
 
@@ -29,25 +31,29 @@
     user:
      name: "{{item}}"
      shell: "/bin/bash"
+     password: "{{password}}"
      group: Users
      state: present
+     generate_ssh_key: yes
+     ssh_key_bits: 2048
+     ssh_key_file: /home/{{item}}/.ssh/id_rsa
     with_items:
      - "user1"
      - "user2"
-  - name: generate SSh keys
-    openssh_keypair:
-     path: /home/{{item}}/.ssh/id_ssh_rsa
-    loop:
-     - "user1"
-     - "user2"
-  - name: deploy ssh keys
-    authorized_key:
-     user: "{{item}}"
-     key: "{{ lookup('file', '/home/{{item}}/.ssh/id_ssh_rsa/id_rsa.pub') }}"
-     state: present
-    loop:
-     - "user1"
-     - "user2"
+  #- name: generate SSh keys
+   # openssh_keypair:
+    # path: /home/{{item}}/id_ssh_rsa
+    #loop:
+    # - "user1"
+    # - "user2"
+  #- name: deploy ssh keys
+   # authorized_key:
+    # user: user1
+    # key: "{{ lookup('file', '/home/user1/.ssh/id_rsa') }}"
+    # state: present
+    #loop:
+    # - "user1"
+    # - "user2"
 
   - name: restart httpd server
     service: name=httpd state=restarted
